@@ -32,47 +32,38 @@ void SM300D2Sensor::update() {
   size_t SM300D2_RESPONSE_LENGTH = sizeof(response) / sizeof(response[0]);
 
   // Reading in the bytes into response
-  bool read_success = read_array(response, SM300D2_RESPONSE_LENGTH);
-  // Read the last 16 bytes
-  char last_16_bytes[16];
-  std::memcpy(last_16_bytes, response + (SM300D2_RESPONSE_LENGTH - 16), 16);
-
-  // Strip the last 2 bytes
-  char stripped_bytes[14];
-  std::memcpy(stripped_bytes, last_16_bytes, 14);
-
-
+  uint8_t last_16_bytes[16];
+  // bool read_success = read_array(response, SM300D2_RESPONSE_LENGTH);
+  bool read_success = read_array(last_16_bytes, sizeof(last_16_bytes));
   // If no data recieved within 1 sec. Throw error
   if (!read_success) {
     ESP_LOGW(TAG, "Reading data from SM300D2 failed!");
     status_set_warning();
     return;
   }
+
   this->status_clear_warning();
-  ESP_LOGD(TAG, "Successfully read SM300D2 data %s", response);
-  // Coms Address of device
-  const uint16_t addr = (response[0]);
-  // Vendor Function Type
-  const uint16_t function = (SM300D2_RESPONSE_LENGTH);
-  // Sensor Data
-  const uint16_t co2 = (response[3] * 256) + response[4];
-  const uint16_t formaldehyde = (response[5] * 256) + response[6];
-  const uint16_t tvoc = (response[7] * 256) + response[8];
-  const uint16_t pm_2_5 = (response[9] * 256) + response[10];
-  const uint16_t pm_10_0 = (response[11] * 256) + response[12];
+  ESP_LOGD(TAG, "Successfully read SM300D2 data %s", last_16_bytes);
+
+  // Sensor Data Only
+  const uint16_t co2 = (last_16_bytes[0] * 256) + last_16_bytes[1];
+  const uint16_t formaldehyde = (last_16_bytes[2] * 256) + last_16_bytes[3];
+  const uint16_t tvoc = (last_16_bytes[4] * 256) + last_16_bytes[5];
+  const uint16_t pm_2_5 = (last_16_bytes[6] * 256) + last_16_bytes[7];
+  const uint16_t pm_10_0 = (last_16_bytes[8] * 256) + last_16_bytes[9];
   // A negative value is indicated by adding 0x80 (128) to the temperature value
-  const float temperature = ((response[13] + (response[14] * 0.1f)) > 128)
-                                ? (((response[13] + (response[14] * 0.1f)) - 128) * -1)
-                                : response[13] + (response[14] * 0.1f);
-  const float humidity = response[15] + (response[14] * 0.1);
+  const float temperature = ((last_16_bytes[10] + (last_16_bytes[11] * 0.1f)) > 128)
+                                ? (((last_16_bytes[10] + (last_16_bytes[11] * 0.1f)) - 128) * -1)
+                                : last_16_bytes[10] + (last_16_bytes[11] * 0.1f);
+  const float humidity = last_16_bytes[12] + (last_16_bytes[13] * 0.1);
 
   // Report out to log and publish to HA
-  ESP_LOGD(TAG, "Received Addr: %u", addr);
-  if (this->addr_sensor_ != nullptr)
-    this->addr_sensor_->publish_state(addr);
-  ESP_LOGD(TAG, "Received Function Type: %u", function);
-  if (this->function_sensor_ != nullptr)
-    this->function_sensor_->publish_state(function);
+  // ESP_LOGD(TAG, "Received Addr: %u", addr);
+  // if (this->addr_sensor_ != nullptr)
+  //  this->addr_sensor_->publish_state(addr);
+  // ESP_LOGD(TAG, "Received Function Type: %u", function);
+  // if (this->function_sensor_ != nullptr)
+  //  this->function_sensor_->publish_state(function);
   ESP_LOGD(TAG, "Received CO₂: %u ppm", co2);
   if (this->co2_sensor_ != nullptr)
     this->co2_sensor_->publish_state(co2);
