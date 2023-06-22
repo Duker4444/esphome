@@ -18,7 +18,7 @@ void SM300D2Sensor::update() {
     this->peek_byte(&peeked);
 
     // Check if approx half-second delay has elapsed since the previous byte
-    if (millis() - previous_time >= 300 && peeked == 0x01) {
+    if (millis() - previous_time >= 100 && peeked == 0x01) {
       break;  // Exit the loop if the desired byte and delay are satisfied
     }
 
