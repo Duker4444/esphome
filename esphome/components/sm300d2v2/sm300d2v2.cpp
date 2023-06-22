@@ -29,8 +29,9 @@ void SM300D2Sensor::update() {
     // Reset the start time whenever a byte is registered
     // start_time = millis();
   }
+  size_t SM300D2_RESPONSE_LENGTH = sizeof(response) / sizeof(response[0]);
 
-  // Reading in the 19 bytes into response
+  // Reading in the bytes into response
   bool read_success = read_array(response, SM300D2_RESPONSE_LENGTH);
   // If no data recieved within 1 sec. Throw error
   if (!read_success) {
