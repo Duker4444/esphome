@@ -4,12 +4,12 @@
 namespace esphome {
 namespace sm300d2v2 {
 static const char *const TAG = "sm300d2v2";
-static const uint8_t SM300D2_RESPONSE_LENGTH = 17;
+static const uint8_t SM300D2_RESPONSE_LENGTH = 20;
 
 void SM300D2Sensor::update() {
   uint8_t response[SM300D2_RESPONSE_LENGTH];
   uint8_t peeked;
-  // uint8_t previous_byte = 0;
+  uint8_t previous_byte = 0;
   // adding timer for trigger between datasets.
   uint32_t previous_time = 0;
   // uint32_t start_time = millis();
@@ -22,7 +22,7 @@ void SM300D2Sensor::update() {
       break;  // Exit the loop if the desired byte and delay are satisfied
     }
 
-    // previous_byte = peeked;
+    previous_byte = peeked;
     previous_time = millis();
     this->read();
     // Reset the start time whenever a byte is registered
