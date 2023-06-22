@@ -3,9 +3,8 @@
 
 namespace esphome {
 namespace sm300d2v2 {
-// Increased Byte legnth to read 19 vs old 17
 static const char *const TAG = "sm300d2v2";
-static const uint8_t SM300D2_RESPONSE_LENGTH = 19;
+static const uint8_t SM300D2_RESPONSE_LENGTH = 17;
 
 void SM300D2Sensor::update() {
   uint8_t response[SM300D2_RESPONSE_LENGTH];
@@ -29,10 +28,20 @@ void SM300D2Sensor::update() {
     // Reset the start time whenever a byte is registered
     // start_time = millis();
   }
+  //Determining the number of bytes recieved and setting SM300D2_RESPONSE_LENGTH to make correction for v2 hardware
   size_t SM300D2_RESPONSE_LENGTH = sizeof(response) / sizeof(response[0]);
 
   // Reading in the bytes into response
   bool read_success = read_array(response, SM300D2_RESPONSE_LENGTH);
+  // Read the last 16 bytes
+  char last_16_bytes[16];
+  std::memcpy(last_16_bytes, response + (SM300D2_RESPONSE_LENGTH - 16), 16);
+
+  // Strip the last 2 bytes
+  char stripped_bytes[14];
+  std::memcpy(stripped_bytes, last_16_bytes, 14);
+
+
   // If no data recieved within 1 sec. Throw error
   if (!read_success) {
     ESP_LOGW(TAG, "Reading data from SM300D2 failed!");
@@ -41,7 +50,7 @@ void SM300D2Sensor::update() {
   }
   this->status_clear_warning();
   ESP_LOGD(TAG, "Successfully read SM300D2 data %s", response);
-  // Bitchass Address of device
+  // Coms Address of device
   const uint16_t addr = (response[0]);
   // Vendor Function Type
   const uint16_t function = (SM300D2_RESPONSE_LENGTH);
