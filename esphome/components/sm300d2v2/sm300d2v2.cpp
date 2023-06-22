@@ -44,7 +44,7 @@ void SM300D2Sensor::update() {
   // Bitchass Address of device
   const uint16_t addr = (response[0]);
   // Vendor Function Type
-  const uint16_t function = (response[1]) + response[2];
+  const uint16_t function = (SM300D2_RESPONSE_LENGTH);
   // Sensor Data
   const uint16_t co2 = (response[3] * 256) + response[4];
   const uint16_t formaldehyde = (response[5] * 256) + response[6];
